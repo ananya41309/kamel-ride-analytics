@@ -1,0 +1,965 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kamel Ride · Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* ── Reset & base ─────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0b0c10;
+    --surface:   #12141a;
+    --border:    #1f2230;
+    --accent:    #f5a623;
+    --accent2:   #e05c3b;
+    --green:     #2ecc8e;
+    --muted:     #4a5068;
+    --text:      #e8eaf0;
+    --text-dim:  #7a8199;
+    --mono:      'Space Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+    --radius:    8px;
+    --card-pad:  24px;
+  }
+
+  html { font-size: 14px; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,12,16,0.92);
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .live-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(46,204,142,0.1);
+    border: 1px solid rgba(46,204,142,0.25);
+    color: var(--green);
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-family: var(--mono);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  .refresh-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    transition: all 0.15s;
+  }
+  .refresh-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── Layout ──────────────────────────────────────────────────────── */
+  main {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 28px 32px 48px;
+  }
+
+  .page-title {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  /* ── KPI grid ────────────────────────────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--card-pad);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .kpi-card:hover { border-color: #2a2f42; }
+  .kpi-card:hover::before { opacity: 1; }
+
+  .kpi-label {
+    font-size: 0.7rem;
+    font-family: var(--mono);
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .kpi-sub {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  .kpi-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-family: var(--mono);
+    font-weight: 700;
+    margin-top: 6px;
+  }
+  .badge-green { background: rgba(46,204,142,0.12); color: var(--green); }
+  .badge-orange { background: rgba(245,166,35,0.12); color: var(--accent); }
+  .badge-red { background: rgba(224,92,59,0.12); color: var(--accent2); }
+
+  /* ── Two-column row ──────────────────────────────────────────────── */
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .row-3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  /* ── Generic card ────────────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--card-pad);
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ── Chart ───────────────────────────────────────────────────────── */
+  .chart-wrap {
+    width: 100%;
+    height: 160px;
+    position: relative;
+  }
+
+  #timeSeriesCanvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* ── Bar chart for event types ───────────────────────────────────── */
+  .bar-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .bar-row { display: flex; flex-direction: column; gap: 4px; }
+
+  .bar-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .bar-type-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+
+  .bar-count {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .bar-track {
+    height: 5px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── Source donut ────────────────────────────────────────────────── */
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  #donutCanvas {
+    flex-shrink: 0;
+  }
+
+  .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+  .legend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-label {
+    flex: 1;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .legend-val {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* ── Event feed ──────────────────────────────────────────────────── */
+  .event-feed { display: flex; flex-direction: column; gap: 0; }
+
+  .feed-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .feed-item:last-child { border-bottom: none; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .event-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .event-type {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text);
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .event-meta {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+
+  .event-time {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* ── Ingest panel ─────────────────────────────────────────────────── */
+  .ingest-form { display: flex; flex-direction: column; gap: 12px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  select, input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+
+  select:focus, input:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+
+  select option { background: var(--surface); }
+
+  textarea {
+    resize: vertical;
+    min-height: 72px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+  }
+
+  label {
+    font-size: 0.72rem;
+    font-family: var(--mono);
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .field { display: flex; flex-direction: column; }
+
+  .send-btn {
+    background: var(--accent);
+    color: #000;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    align-self: flex-start;
+  }
+
+  .send-btn:hover { opacity: 0.88; }
+  .send-btn:active { transform: scale(0.97); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .toast {
+    display: none;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    font-size: 0.78rem;
+    font-family: var(--mono);
+    margin-top: 4px;
+  }
+  .toast.success { background: rgba(46,204,142,0.12); color: var(--green); border: 1px solid rgba(46,204,142,0.2); display: block; }
+  .toast.error   { background: rgba(224,92,59,0.12);  color: var(--accent2); border: 1px solid rgba(224,92,59,0.2); display: block; }
+
+  /* ── Stats duo ────────────────────────────────────────────────────── */
+  .stat-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .stat-item { display: flex; flex-direction: column; gap: 4px; }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-value.green { color: var(--green); }
+  .stat-value.orange { color: var(--accent); }
+
+  /* ── Divider ──────────────────────────────────────────────────────── */
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  /* ── Loading ──────────────────────────────────────────────────────── */
+  .loading {
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 32px 0;
+    text-align: center;
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2,1fr); }
+    .row-3 { grid-template-columns: 1fr; }
+    .row-2 { grid-template-columns: 1fr; }
+    main { padding: 20px 16px 40px; }
+    header { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🐪</div>
+    Kamel Analytics
+  </div>
+  <div class="header-right">
+    <div class="live-pill"><div class="dot"></div> LIVE</div>
+    <button class="refresh-btn" onclick="loadAnalytics()">↻ Refresh</button>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Event Analytics Dashboard</div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Events</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-sub">all time</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Unique Users</div>
+      <div class="kpi-value" id="kpi-users">—</div>
+      <div class="kpi-sub">distinct user IDs</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ride Conversion</div>
+      <div class="kpi-value" id="kpi-conversion">—</div>
+      <div id="kpi-conversion-badge" class="kpi-badge badge-green" style="display:none"></div>
+      <div class="kpi-sub">requested → completed</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value" id="kpi-revenue">—</div>
+      <div id="kpi-failed" class="kpi-sub"></div>
+    </div>
+  </div>
+
+  <!-- Time series + event types -->
+  <div class="row-3">
+    <div class="card">
+      <div class="card-title">
+        <span>Events Over Time</span>
+        <span id="ts-range" style="font-size:0.65rem;color:var(--muted)"></span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="timeSeriesCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Event Breakdown</div>
+      <div class="bar-list" id="event-type-bars">
+        <div class="loading">Loading…</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Source Split</div>
+      <div class="donut-wrap">
+        <canvas id="donutCanvas" width="90" height="90"></canvas>
+        <div class="donut-legend" id="donut-legend"></div>
+      </div>
+      <hr class="divider" />
+      <div class="stat-list">
+        <div class="stat-item">
+          <div class="stat-label">Avg Driver Rating</div>
+          <div class="stat-value orange" id="stat-rating">—</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Avg Ride Duration</div>
+          <div class="stat-value" id="stat-duration">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feed + ingest -->
+  <div class="row-2">
+    <div class="card">
+      <div class="card-title">
+        <span>Recent Events</span>
+        <span id="feed-count" style="color:var(--muted);font-size:0.65rem"></span>
+      </div>
+      <div class="event-feed" id="event-feed">
+        <div class="loading">Loading…</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Send Test Event</div>
+      <div class="ingest-form">
+        <div class="form-row">
+          <div class="field">
+            <label>Event Type</label>
+            <select id="f-type">
+              <option value="page_view">page_view</option>
+              <option value="button_click">button_click</option>
+              <option value="form_submit">form_submit</option>
+              <option value="ride_requested">ride_requested</option>
+              <option value="ride_completed">ride_completed</option>
+              <option value="ride_cancelled">ride_cancelled</option>
+              <option value="user_signup">user_signup</option>
+              <option value="user_login">user_login</option>
+              <option value="payment_success">payment_success</option>
+              <option value="payment_failed">payment_failed</option>
+              <option value="driver_assigned">driver_assigned</option>
+              <option value="driver_arrived">driver_arrived</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Source</label>
+            <select id="f-source">
+              <option value="web">web</option>
+              <option value="ios">ios</option>
+              <option value="android">android</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Payload (JSON)</label>
+          <textarea id="f-payload">{"userId": "user_1", "sessionId": "sess_test"}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="send-btn" id="send-btn" onclick="sendEvent()">Send Event →</button>
+        </div>
+        <div class="toast" id="toast"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+const BASE = '';  // same origin
+
+const EVENT_ICONS = {
+  page_view:       { icon: '📄', bg: 'rgba(100,120,255,0.12)' },
+  button_click:    { icon: '👆', bg: 'rgba(245,166,35,0.12)' },
+  form_submit:     { icon: '📝', bg: 'rgba(245,166,35,0.12)' },
+  ride_requested:  { icon: '🚗', bg: 'rgba(46,204,142,0.12)' },
+  ride_completed:  { icon: '✅', bg: 'rgba(46,204,142,0.15)' },
+  ride_cancelled:  { icon: '❌', bg: 'rgba(224,92,59,0.12)' },
+  user_signup:     { icon: '🎉', bg: 'rgba(178,100,255,0.12)' },
+  user_login:      { icon: '🔑', bg: 'rgba(100,180,255,0.12)' },
+  payment_success: { icon: '💰', bg: 'rgba(46,204,142,0.12)' },
+  payment_failed:  { icon: '⚠️', bg: 'rgba(224,92,59,0.15)' },
+  driver_assigned: { icon: '🧭', bg: 'rgba(245,166,35,0.1)' },
+  driver_arrived:  { icon: '📍', bg: 'rgba(245,166,35,0.1)' },
+};
+
+const SOURCE_COLORS = ['#f5a623', '#2ecc8e', '#e05c3b', '#6478ff'];
+
+function timeAgo(iso) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return `${Math.floor(diff)}s ago`;
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  return `${Math.floor(diff/3600)}h ago`;
+}
+
+function fmt(n) {
+  return n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Canvas: time-series line chart
+// ─────────────────────────────────────────────────────────────────────────────
+let tsCanvas, tsCtx;
+
+function drawTimeSeries(points) {
+  if (!tsCanvas) {
+    tsCanvas = document.getElementById('timeSeriesCanvas');
+    tsCtx = tsCanvas.getContext('2d');
+  }
+
+  const dpr = window.devicePixelRatio || 1;
+  const w = tsCanvas.parentElement.clientWidth;
+  const h = tsCanvas.parentElement.clientHeight;
+  tsCanvas.width = w * dpr;
+  tsCanvas.height = h * dpr;
+  tsCanvas.style.width = w + 'px';
+  tsCanvas.style.height = h + 'px';
+  tsCtx.scale(dpr, dpr);
+
+  const ctx = tsCtx;
+  ctx.clearRect(0, 0, w, h);
+
+  if (!points || points.length === 0) {
+    ctx.fillStyle = '#4a5068';
+    ctx.font = '12px Space Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('No data', w/2, h/2);
+    return;
+  }
+
+  const pad = { top: 10, right: 10, bottom: 24, left: 28 };
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+
+  const counts = points.map(p => p.count);
+  const maxC = Math.max(...counts, 1);
+
+  // Grid lines
+  ctx.strokeStyle = '#1f2230';
+  ctx.lineWidth = 1;
+  [0.25, 0.5, 0.75, 1].forEach(f => {
+    const y = pad.top + ch * (1 - f);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + cw, y);
+    ctx.stroke();
+
+    ctx.fillStyle = '#4a5068';
+    ctx.font = `9px Space Mono`;
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(maxC * f), pad.left - 4, y + 3);
+  });
+
+  // Build path
+  const xs = points.map((_, i) => pad.left + (i / (points.length - 1)) * cw);
+  const ys = points.map(p => pad.top + ch * (1 - p.count / maxC));
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + ch);
+  grad.addColorStop(0, 'rgba(245,166,35,0.28)');
+  grad.addColorStop(1, 'rgba(245,166,35,0)');
+
+  ctx.beginPath();
+  ctx.moveTo(xs[0], ys[0]);
+  for (let i = 1; i < points.length; i++) {
+    const cx = (xs[i-1] + xs[i]) / 2;
+    ctx.bezierCurveTo(cx, ys[i-1], cx, ys[i], xs[i], ys[i]);
+  }
+  ctx.lineTo(xs[xs.length-1], pad.top + ch);
+  ctx.lineTo(xs[0], pad.top + ch);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(xs[0], ys[0]);
+  for (let i = 1; i < points.length; i++) {
+    const cx = (xs[i-1] + xs[i]) / 2;
+    ctx.bezierCurveTo(cx, ys[i-1], cx, ys[i], xs[i], ys[i]);
+  }
+  ctx.strokeStyle = '#f5a623';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // X labels (first, middle, last)
+  const labelIdxs = [0, Math.floor(points.length/2), points.length-1];
+  ctx.fillStyle = '#4a5068';
+  ctx.font = '8px Space Mono';
+  ctx.textAlign = 'center';
+  labelIdxs.forEach(i => {
+    const label = points[i].timestamp.slice(11,16); // HH:MM
+    ctx.fillText(label, xs[i], h - 4);
+  });
+
+  // Range label
+  if (points.length > 1) {
+    document.getElementById('ts-range').textContent =
+      points[0].timestamp.slice(11,16) + ' – ' + points[points.length-1].timestamp.slice(11,16);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Canvas: donut chart
+// ─────────────────────────────────────────────────────────────────────────────
+function drawDonut(sources) {
+  const canvas = document.getElementById('donutCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = 90 * dpr;
+  canvas.height = 90 * dpr;
+  ctx.scale(dpr, dpr);
+
+  const cx = 45, cy = 45, r = 38, inner = 22;
+  const total = sources.reduce((s, x) => s + x.count, 0) || 1;
+
+  let angle = -Math.PI / 2;
+  sources.forEach((s, i) => {
+    const slice = (s.count / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, angle, angle + slice);
+    ctx.closePath();
+    ctx.fillStyle = SOURCE_COLORS[i % SOURCE_COLORS.length];
+    ctx.fill();
+    angle += slice;
+  });
+
+  // Punch hole
+  ctx.beginPath();
+  ctx.arc(cx, cy, inner, 0, Math.PI * 2);
+  ctx.fillStyle = '#12141a';
+  ctx.fill();
+
+  // Legend
+  const legend = document.getElementById('donut-legend');
+  legend.innerHTML = sources.map((s, i) => `
+    <div class="legend-row">
+      <div class="legend-dot" style="background:${SOURCE_COLORS[i % SOURCE_COLORS.length]}"></div>
+      <span class="legend-label">${s.source}</span>
+      <span class="legend-val">${s.count}</span>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Render analytics
+// ─────────────────────────────────────────────────────────────────────────────
+function renderAnalytics(d) {
+  // KPIs
+  document.getElementById('kpi-total').textContent = fmt(d.totalEvents);
+  document.getElementById('kpi-users').textContent = fmt(d.uniqueUsers);
+
+  if (d.conversionRate !== null) {
+    document.getElementById('kpi-conversion').textContent = d.conversionRate + '%';
+    const badge = document.getElementById('kpi-conversion-badge');
+    badge.style.display = 'inline-block';
+    badge.textContent = d.conversionRate >= 60 ? '▲ Strong' : d.conversionRate >= 30 ? '~ Moderate' : '▼ Low';
+    badge.className = 'kpi-badge ' + (d.conversionRate >= 60 ? 'badge-green' : d.conversionRate >= 30 ? 'badge-orange' : 'badge-red');
+  } else {
+    document.getElementById('kpi-conversion').textContent = 'N/A';
+  }
+
+  document.getElementById('kpi-revenue').textContent = '$' + d.totalRevenue.toFixed(2);
+  document.getElementById('kpi-failed').textContent = d.failedPayments > 0
+    ? `⚠ ${d.failedPayments} failed payment${d.failedPayments > 1 ? 's' : ''}`
+    : '✓ No failed payments';
+
+  // Time series
+  drawTimeSeries(d.timeSeries);
+
+  // Event type bars
+  const maxCount = d.eventsByType[0]?.count || 1;
+  document.getElementById('event-type-bars').innerHTML = d.eventsByType.slice(0, 8).map(e => `
+    <div class="bar-row">
+      <div class="bar-meta">
+        <span class="bar-type-label">${e.type.replace(/_/g,' ')}</span>
+        <span class="bar-count">${e.count}</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${(e.count/maxCount*100).toFixed(1)}%"></div>
+      </div>
+    </div>
+  `).join('');
+
+  // Donut
+  drawDonut(d.eventsBySource);
+
+  // Stats
+  document.getElementById('stat-rating').textContent =
+    d.avgDriverRating !== null ? '★ ' + d.avgDriverRating.toFixed(2) : '—';
+
+  if (d.avgRideDurationSeconds !== null) {
+    const mins = Math.floor(d.avgRideDurationSeconds / 60);
+    const secs = d.avgRideDurationSeconds % 60;
+    document.getElementById('stat-duration').textContent = `${mins}m ${secs}s`;
+  } else {
+    document.getElementById('stat-duration').textContent = '—';
+  }
+
+  // Event feed
+  document.getElementById('feed-count').textContent = `${d.recentEvents.length} shown`;
+  document.getElementById('event-feed').innerHTML = d.recentEvents.map(e => {
+    const info = EVENT_ICONS[e.type] || { icon: '⚡', bg: 'rgba(255,255,255,0.06)' };
+    const meta = Object.entries(e.payload)
+      .filter(([k]) => !['userId','sessionId'].includes(k))
+      .slice(0, 2)
+      .map(([k,v]) => `${k}: ${v}`)
+      .join(' · ') || `src: ${e.source}`;
+    return `
+      <div class="feed-item">
+        <div class="event-icon" style="background:${info.bg}">${info.icon}</div>
+        <div>
+          <div class="event-type">${e.type}</div>
+          <div class="event-meta">${meta}</div>
+        </div>
+        <div class="event-time">${timeAgo(e.timestamp)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Fetch & load
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadAnalytics() {
+  try {
+    const res = await fetch(BASE + '/api/analytics');
+    const data = await res.json();
+    renderAnalytics(data);
+  } catch (err) {
+    console.error('Failed to load analytics:', err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Send event
+// ─────────────────────────────────────────────────────────────────────────────
+async function sendEvent() {
+  const btn = document.getElementById('send-btn');
+  const toast = document.getElementById('toast');
+  toast.className = 'toast';
+  toast.textContent = '';
+
+  let payload = {};
+  try {
+    payload = JSON.parse(document.getElementById('f-payload').value || '{}');
+  } catch {
+    toast.textContent = '✗ Invalid JSON in payload';
+    toast.className = 'toast error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    const res = await fetch(BASE + '/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: document.getElementById('f-type').value,
+        source: document.getElementById('f-source').value,
+        payload,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      toast.textContent = `✓ Event ingested (id: ${data.event.id.slice(0,8)}…)`;
+      toast.className = 'toast success';
+      await loadAnalytics();
+    } else {
+      toast.textContent = `✗ ${data.error}`;
+      toast.className = 'toast error';
+    }
+  } catch (err) {
+    toast.textContent = '✗ Network error';
+    toast.className = 'toast error';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send Event →';
+    setTimeout(() => { toast.className = 'toast'; }, 4000);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Init & auto-refresh every 15 s
+// ─────────────────────────────────────────────────────────────────────────────
+loadAnalytics();
+setInterval(loadAnalytics, 15000);
+window.addEventListener('resize', loadAnalytics);
+</script>
+</body>
+</html>

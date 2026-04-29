@@ -1,0 +1,28 @@
+{
+  "name": "kamel-analytics",
+  "version": "1.0.0",
+  "description": "Event collection and analytics dashboard for Kamel Ride",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "@types/uuid": "^8.3.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
